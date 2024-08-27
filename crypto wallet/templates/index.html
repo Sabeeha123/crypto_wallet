@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navbar with Login Popup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #111;
+            
+        }
+        .navbar {
+            background-color: #333;
+            padding: 10px;
+            color: white;
+            text-align: center;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 14px 20px;
+            display: inline-block;
+        }
+        .navbar a:hover {
+            background-color: #575757;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            border-radius: 8px;
+        }
+        .popup h2 {
+            margin-top: 0;
+        }
+        .popup button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .popup button:hover {
+            background-color: #575757;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .hero-section {
+            height: 100vh;
+            background-image: url("https://www.codingnepalweb.com/demos/create-responsive-coffee-website-html-css/hero-bg.jpg");
+            background-position: center;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+          }
+          .hero-section .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            color: #fff;
+          }
+          .hero-section .content h2 {
+            font-size: 3rem;
+            max-width: 600px;
+            line-height: 70px;
+          }
+          .hero-section .content p {
+            font-weight: 300;
+            max-width: 600px;
+            margin-top: 15px;
+          }
+          .hero-section .content button {
+            background: #fff;
+            padding: 12px 30px;
+            border: none;
+            font-size: 1rem;
+            border-radius: 6px;
+            margin-top: 38px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s ease;
+          }
+          .hero-section .content button:hover {
+            color: #fff;
+            background: #C06B3E;
+          }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="#">Home</a>
+        <a href="#">About</a>
+        <a href="#" id="loginBtn">Connect Wallet</a>
+    </div>
+
+    <div class="overlay" id="overlay">
+        
+    </div>
+
+    <section class="hero-section">
+        <div class="content">
+          <h2>Crypto Wallet</h2>
+          <p>
+            Where you can check with the balance, Wallet address and also you can play flip a coin game.
+          </p>
+
+        </div>
+      </section>
+
+    <div class="popup" id="popup">
+        <center>
+        <h2>Connect Your MetaMask Wallet Here!</h2>
+            <button type="button" onclick="connectWallet()">Connect Wallet</button>
+        </center>
+    </div>
+
+    <script>
+        document.getElementById('loginBtn').addEventListener('click', function() {
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('popup').style.display = 'block';
+        });
+
+        document.getElementById('overlay').addEventListener('click', function() {
+            closePopup();
+        });
+
+        function closePopup() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('popup').style.display = 'none';
+        }
+
+        async function connectWallet() {
+            if (typeof window.ethereum === 'undefined') {
+                alert('MetaMask is not installed. Please install it to connect your wallet.');
+                return;
+            }
+
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                if (accounts.length === 0) {
+                    alert('No accounts found. Please connect a wallet.');
+                    return;
+                }
+
+                window.userWalletAddress = accounts[0];
+                document.getElementById('loginBtn').innerText = 'Sign Out';
+
+                // Optionally close the popup before redirecting
+                closePopup();
+
+                // Redirect to home page only if connected
+                if (window.userWalletAddress) {
+                    window.location.href = '{{ url_for("main") }}'; // Flask way to redirect to main route
+                }
+
+            } catch (error) {
+                console.error('Error connecting to MetaMask:', error.message);
+            }
+        }
+
+        function signOutOfMetaMask() {
+            window.userWalletAddress = null;
+            document.getElementById('loginBtn').innerText = 'Connect Wallet';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof window.ethereum !== 'undefined') {
+                window.ethereum.request({ method: 'eth_accounts' })
+                    .then(accounts => {
+                        if (accounts.length > 0) {
+                            window.userWalletAddress = accounts[0];
+                            document.getElementById('loginBtn').innerText = 'Connect Wallet';
+                        }
+                    })
+                    .catch(console.error);
+            }
+        });
+    </script>
+
+</body>
+</html>

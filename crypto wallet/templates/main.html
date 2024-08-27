@@ -1,0 +1,282 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #111;
+        }
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        .header button {
+            padding: 10px;
+            margin: 10px;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .header button:hover {
+            background-color: #575757;
+        }
+        .hero-section .container {
+            padding: 20px;
+            text-align: center;
+            height: 500px;
+            width: 50%;
+            
+        }
+        .hero-section .container button {
+            padding: 10px;
+            margin: 10px;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .hero-section .container button:hover {
+            background-color: #575757;
+        }
+        .hero-section #balanceDisplay {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        .hero-section h1{
+            font-size: 18px;
+            color: white;
+            vertical-align: middle;
+        }
+        .content .coin-flip {
+            margin-top: 30px;
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: none; /* Initially hidden */
+            height: 500px;
+            width: 50%;
+        }
+        .content .coin-flip form {
+            display: inline-block;
+            text-align: left;
+            max-width: 600px;
+            height: 100px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .content .coin-flip label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .content .coin-flip select, .coin-flip input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .content .coin-flip button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .content .coin-flip button:hover {
+            background-color: #0056b3;
+        }
+        .content #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.1/dist/web3.min.js"></script>
+</head>
+<body>
+
+    <div class="header">
+        <span id="walletAddress">Connecting...</span>
+        <button id="connectWallet" style="display:none;">Connect Wallet</button>
+        <button id="signOut" style="display:none;" onclick="signOut()">Sign Out</button>
+    </div>
+<!--
+    <div class="container">
+        <button id="checkBalance" style="display:none;">Check Balance</button>
+        <div id="balanceDisplay"></div> <!-- Area to display balance -->
+<!--    </div>  -->
+<center>
+    <section class="hero-section">
+        <div class="container">
+            <h1> To know the balance in your Wallet check here </h1>
+            <button id="checkBalance" style="display:none;">Check Balance</button>
+            <div id="balanceDisplay"></div> <!-- Area to display balance -->
+        </div>
+      </section>
+    </center>
+    <center>
+    <section class="content">
+    <div class="coin-flip">
+  
+        <form id="coinflip-form">
+            <label for="blockchain">Choose Blockchain:</label>
+            <select id="blockchain" name="blockchain">
+                <option value="ethereum">Ethereum</option>
+                <option value="polygon">Polygon</option>
+                <option value="solana">Solana</option>
+                <option value="bitcoin">Bitcoin</option>
+            </select>
+
+            <label for="choice">Choose Side:</label>
+            <select id="choice" name="choice">
+                <option value="heads">Heads</option>
+                <option value="tails">Tails</option>
+            </select>
+
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" step="0.01" min="0" required>
+
+            <button type="submit">Flip Coin</button>
+        </form>
+
+        <div id="result"></div> <!-- Area to display coin flip result -->
+    </center>
+    </div>
+</section>
+
+    <script>
+        let web3;
+
+        window.onload = async function() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                try {
+                    const accounts = await web3.eth.getAccounts();
+                    if (accounts.length > 0) {
+                        const address = accounts[0];
+                        document.getElementById('walletAddress').textContent = `Wallet Address: ${address}`;
+                        document.getElementById('signOut').style.display = 'inline';
+                        document.getElementById('checkBalance').style.display = 'inline';
+                        document.querySelector('.coin-flip').style.display = 'block'; // Show coin flip section
+                    } else {
+                        document.getElementById('connectWallet').style.display = 'inline';
+                        document.getElementById('walletAddress').textContent = 'Please connect your wallet';
+                        document.querySelector('.coin-flip').style.display = 'none'; // Hide coin flip section
+                    }
+                } catch (error) {
+                    console.error('Error fetching accounts:', error);
+                    document.getElementById('walletAddress').textContent = 'Error connecting wallet';
+                }
+            } else {
+                document.getElementById('connectWallet').style.display = 'inline';
+                document.getElementById('walletAddress').textContent = 'Please install MetaMask or another Web3 provider';
+                document.querySelector('.coin-flip').style.display = 'none'; // Hide coin flip section
+            }
+        };
+
+        document.getElementById('connectWallet').addEventListener('click', async function() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                try {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    const accounts = await web3.eth.getAccounts();
+                    const address = accounts[0];
+                    document.getElementById('walletAddress').textContent = `Wallet Address: ${address}`;
+                    document.getElementById('connectWallet').style.display = 'none';
+                    document.getElementById('signOut').style.display = 'inline';
+                    document.getElementById('checkBalance').style.display = 'inline';
+                    document.querySelector('.coin-flip').style.display = 'block'; // Show coin flip section
+                } catch (error) {
+                    console.error('User denied account access or other error:', error);
+                }
+            } else {
+                alert('Please install MetaMask or another Web3 provider.');
+            }
+        });
+
+        function signOut() {
+            document.getElementById('walletAddress').textContent = 'Please connect your wallet';
+            document.getElementById('connectWallet').style.display = 'inline';
+            document.getElementById('signOut').style.display = 'none';
+            document.getElementById('checkBalance').style.display = 'none';
+            document.getElementById('balanceDisplay').textContent = ''; // Clear balance display
+            document.getElementById('result').textContent = ''; // Clear coin result display
+            document.querySelector('.coin-flip').style.display = 'none'; // Hide coin flip section
+            web3 = null;
+            
+            // Redirect to homepage
+            window.location.href = '/'; // Adjust this path based on your actual homepage URL
+        }
+
+        document.getElementById('checkBalance').addEventListener('click', async function() {
+            if (web3) {
+                try {
+                    const accounts = await web3.eth.getAccounts();
+                    const address = accounts[0];
+                    const balanceWei = await web3.eth.getBalance(address);
+                    const balanceEther = web3.utils.fromWei(balanceWei, 'ether');
+                    document.getElementById('balanceDisplay').textContent = `Balance: ${balanceEther} ETH`;
+                } catch (error) {
+                    console.error('Error fetching balance:', error);
+                    document.getElementById('balanceDisplay').textContent = 'Error fetching balance';
+                }
+            } else {
+                document.getElementById('balanceDisplay').textContent = 'Wallet is not connected.';
+            }
+        });
+
+        document.getElementById('coinflip-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const blockchain = document.getElementById('blockchain').value;
+            const choice = document.getElementById('choice').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            const resultDiv = document.getElementById('result');
+
+            try {
+                const response = await fetch('/flip', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ blockchain, choice, amount })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+
+                if (result.status === 'win') {
+                    resultDiv.innerHTML = `Congratulations! You won ${result.amount} tokens.`;
+                } else {
+                    resultDiv.innerHTML = `Sorry, you lost.`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `Error: ${error.message}`;
+            }
+        });
+    </script>
+
+</body>
+</html>
